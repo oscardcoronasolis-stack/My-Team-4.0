@@ -1,0 +1,45 @@
+<style>
+  
+/* ============================================
+   VARIABLES CSS - PALETA MINIMALISTA GRIS + MORADO
+   ============================================ */
+:root {
+  /* Fondos - Minimalista */
+  --bg-white: #FFFFFF;
+  --bg-light: #F5F6F8;
+  --bg-mist: #ECEFF3;
+  
+  /* Superficies / Tarjetas */
+  --card-bg: #F3F5F9;
+  --card-border: #E2E6ED;
+  --card-shadow: rgba(0, 0, 0, 0.05);
+  
+  /* Morados - Acento Principal */
+  --purple-light: #C9A0DC;
+  --purple-medium: #B07CCF;
+  --purple-dark: #9C6BCF;
+  
+  /* Texto - TODO GRIS OSCURO (NUNCA BLANCO) */
+  --text-primary: #1a1d21;
+  --text-secondary: #3a3f47;
+  --text-muted: #5a6169;
+  --text-light: #1a1d21;
+  
+  /* Estados */
+  --success: #18C6B8;
+  --warning: #F6B48C;
+  
+  /* Bordes y sombras */
+  --border-light: #E2E6ED;
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
+  
+  /* Transiciones */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}
+</style>
