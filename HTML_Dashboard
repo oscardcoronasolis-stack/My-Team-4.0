@@ -1,0 +1,106 @@
+<!-- ============================================
+     DASHBOARD - CONTENEDOR PRINCIPAL
+     ============================================ -->
+<div id="dashboardContainer" class="dashboard-container">
+  
+  <!-- Título de bienvenida -->
+  <h1 class="welcome-title">Bienvenida</h1>
+  
+  <!-- Filtro de Mes -->
+  <div class="filter-card">
+    <div class="filter-card-title">Selecciona el Mes</div>
+    
+    <div class="month-selector" id="monthSelector">
+      <button class="month-btn" data-month="1" onclick="DashboardFilter.selectMonth(1, this)">Ene</button>
+      <button class="month-btn" data-month="2" onclick="DashboardFilter.selectMonth(2, this)">Feb</button>
+      <button class="month-btn" data-month="3" onclick="DashboardFilter.selectMonth(3, this)">Mar</button>
+      <button class="month-btn" data-month="4" onclick="DashboardFilter.selectMonth(4, this)">Abr</button>
+      <button class="month-btn" data-month="5" onclick="DashboardFilter.selectMonth(5, this)">May</button>
+      <button class="month-btn" data-month="6" onclick="DashboardFilter.selectMonth(6, this)">Jun</button>
+      <button class="month-btn" data-month="7" onclick="DashboardFilter.selectMonth(7, this)">Jul</button>
+      <button class="month-btn" data-month="8" onclick="DashboardFilter.selectMonth(8, this)">Ago</button>
+      <button class="month-btn" data-month="9" onclick="DashboardFilter.selectMonth(9, this)">Sep</button>
+      <button class="month-btn" data-month="10" onclick="DashboardFilter.selectMonth(10, this)">Oct</button>
+      <button class="month-btn" data-month="11" onclick="DashboardFilter.selectMonth(11, this)">Nov</button>
+      <button class="month-btn" data-month="12" onclick="DashboardFilter.selectMonth(12, this)">Dic</button>
+    </div>
+    
+    <!-- Indicador del mes seleccionado -->
+    <div id="selectedMonthIndicator" class="selected-month-indicator" style="display: none;">
+      <div class="selected-month-label">Mes seleccionado</div>
+      <div id="selectedMonthValue" class="selected-month-value">-</div>
+    </div>
+  </div>
+  
+  <!-- ============================================
+       TARJETAS CON FILTRO DE MES
+       ============================================ -->
+  
+  <!-- Tarjeta 1: Tu Victoria Personal -->
+  <div id="victoryCard" class="victory-card loading">
+    <span class="victory-card-icon">🏆</span>
+    <div class="victory-card-title">Tu Victoria Personal</div>
+    <div id="victoryAmount" class="victory-card-amount">$0</div>
+    <div class="victory-card-label">Objetivo de Comisión</div>
+    <div class="victory-card-sublabel">Alcanza esta meta y serás imparable</div>
+  </div>
+  
+  <!-- Tarjeta 2: Comisión Actual Mensual -->
+  <div id="commissionCurrentCard" class="commission-current-card loading">
+    <div class="commission-current-title">Comisión Actual Mensual</div>
+    <div id="commissionCurrentAmount" class="commission-current-amount">$0</div>
+    <div class="commission-current-label">Acumulado del mes seleccionado</div>
+  </div>
+  
+  <!-- Tarjeta 3: KPI Mensual -->
+  <div id="kpiCard" class="kpi-card loading">
+    <div class="kpi-card-header">
+      <div class="kpi-card-title">KPI Mensual</div>
+    </div>
+    <div class="kpi-card-content">
+      <div class="kpi-item">
+        <div class="kpi-item-label">$ Meta</div>
+        <div id="kpiMeta" class="kpi-item-value">$0</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-item-label">$ Venta</div>
+        <div id="kpiVenta" class="kpi-item-value">$0</div>
+      </div>
+      <div id="kpiDiffContainer" class="kpi-item">
+        <div id="kpiDiffLabel" class="kpi-item-label">A Favor</div>
+        <div id="kpiDiff" class="kpi-item-value">$0</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ============================================
+       TARJETAS SIN FILTRO (DATOS FIJOS)
+       ============================================ -->
+  
+  <!-- Tarjeta 4: Cómo me fue ayer -->
+  <div id="yesterdayCard" class="yesterday-card loading">
+    <div class="yesterday-card-header">
+      <div class="yesterday-card-title">¿Cómo me fue ayer?</div>
+      <div id="yesterdayDate" class="yesterday-card-date">Cargando...</div>
+    </div>
+    <div class="yesterday-card-content">
+      <div class="yesterday-item">
+        <div class="yesterday-item-label">$ Meta</div>
+        <div id="yesterdayMeta" class="yesterday-item-value">$0</div>
+      </div>
+      <div class="yesterday-item">
+        <div class="yesterday-item-label">$ Venta</div>
+        <div id="yesterdayVenta" class="yesterday-item-value">$0</div>
+      </div>
+      <div id="yesterdayDiffContainer" class="yesterday-item">
+        <div id="yesterdayDiffLabel" class="yesterday-item-label">A Favor</div>
+        <div id="yesterdayDiff" class="yesterday-item-value">$0</div>
+      </div>
+      <div class="yesterday-item">
+        <div class="yesterday-item-label">% Meta</div>
+        <div id="yesterdayPctMeta" class="yesterday-item-value">0%</div>
+      </div>
+    </div>
+  </div>
+  
+</div>
