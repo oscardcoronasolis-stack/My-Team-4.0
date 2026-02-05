@@ -1,0 +1,489 @@
+<style>
+/* ============================================
+   ESTILOS DEL DASHBOARD - MOBILE FIRST
+   ============================================ */
+
+#dashboardScreen {
+  background: linear-gradient(135deg, #F5F6F8 0%, #ECEFF3 100%);
+  min-height: 100vh;
+  padding: 20px 16px;
+}
+
+.dashboard-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Título Bienvenida */
+.welcome-title {
+  color: #1a1d21;
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* ============================================
+   FILTRO DE MES
+   ============================================ */
+.filter-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E6ED;
+}
+
+.filter-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1d21;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-card-title::before {
+  content: '📅';
+  font-size: 18px;
+}
+
+.month-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.month-btn {
+  padding: 12px 8px;
+  background: #F5F6F8;
+  border: 2px solid #E2E6ED;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1d21;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.month-btn:hover {
+  border-color: #C9A0DC;
+  background: #FFFFFF;
+}
+
+.month-btn:active {
+  transform: scale(0.95);
+}
+
+.month-btn.active {
+  background: linear-gradient(135deg, #9C6BCF 0%, #B07CCF 100%);
+  color: #FFFFFF;
+  border-color: #9C6BCF;
+  box-shadow: 0 4px 8px rgba(156, 107, 207, 0.3);
+}
+
+.month-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Indicador de mes seleccionado */
+.selected-month-indicator {
+  margin-top: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(156, 107, 207, 0.1) 0%, rgba(192, 160, 220, 0.1) 100%);
+  border-radius: 8px;
+  border: 1px solid #C9A0DC;
+  text-align: center;
+}
+
+.selected-month-label {
+  font-size: 12px;
+  color: #5a6169;
+  margin-bottom: 4px;
+}
+
+.selected-month-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #9C6BCF;
+}
+
+/* ============================================
+   CONTENEDOR DE DATOS (para futuros elementos)
+   ============================================ */
+.data-container {
+  margin-top: 20px;
+}
+
+.data-placeholder {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  border: 2px dashed #E2E6ED;
+  color: #5a6169;
+  font-size: 14px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 360px) {
+  .month-selector {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .month-btn {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+  
+  .welcome-title {
+    font-size: 28px;
+  }
+}
+
+/* ============================================
+   TARJETA - TU VICTORIA PERSONAL (DORADA SIMPLE)
+   ============================================ */
+
+.victory-card {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
+  border-radius: 16px;
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  box-shadow: 
+    0 8px 24px rgba(255, 165, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  text-align: center;
+}
+
+.victory-card-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  display: block;
+  text-align: center;
+}
+
+.victory-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #5D4E37;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.victory-card-amount {
+  font-family: 'Courier New', monospace;
+  font-size: 44px;
+  font-weight: 700;
+  color: #3D2E1F;
+  margin: 16px 0;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+.victory-card-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5D4E37;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.victory-card-sublabel {
+  font-size: 11px;
+  color: #6D5E47;
+  margin-top: 6px;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Loading state */
+.victory-card.loading .victory-card-amount {
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+  .victory-card {
+    padding: 24px 20px;
+  }
+  
+  .victory-card-amount {
+    font-size: 38px;
+  }
+}
+
+
+/* ============================================
+   TARJETA - COMISIÓN ACTUAL MENSUAL
+   ============================================ */
+
+.commission-current-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E6ED;
+  text-align: center;
+}
+
+.commission-current-icon {
+  font-size: 24px;
+  margin-bottom: 6px;
+  display: block;
+  text-align: center;
+}
+
+.commission-current-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a6169;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.commission-current-amount {
+  font-family: 'Courier New', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: #9C6BCF;
+  margin: 8px 0;
+  text-align: center;
+}
+
+.commission-current-label {
+  font-size: 11px;
+  color: #5a6169;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Loading state */
+.commission-current-card.loading .commission-current-amount {
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+  .commission-current-card {
+    padding: 16px;
+  }
+  
+  .commission-current-amount {
+    font-size: 28px;
+  }
+}
+
+/* ============================================
+   TARJETA - KPI MENSUAL
+   ============================================ */
+
+.kpi-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E6ED;
+  text-align: center;
+}
+
+.kpi-card-header {
+  margin-bottom: 20px;
+}
+
+.kpi-card-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+  display: block;
+  text-align: center;
+}
+
+.kpi-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1d21;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-align: center;
+}
+
+.kpi-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kpi-item {
+  padding: 12px;
+  background: #F5F6F8;
+  border-radius: 8px;
+}
+
+.kpi-item-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5a6169;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.kpi-item-value {
+  font-family: 'Courier New', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: #9C6BCF;
+  text-align: center;
+}
+
+/* Estado especial para Deuda (negativo) */
+.kpi-item.negative .kpi-item-label {
+  color: #D32F2F;
+}
+
+.kpi-item.negative .kpi-item-value {
+  color: #D32F2F;
+}
+
+/* Estado especial para A Favor (positivo) */
+.kpi-item.positive .kpi-item-label {
+  color: #18C6B8;
+}
+
+.kpi-item.positive .kpi-item-value {
+  color: #18C6B8;
+}
+
+/* Loading state */
+.kpi-card.loading .kpi-item-value {
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+  .kpi-card {
+    padding: 20px 16px;
+  }
+  
+  .kpi-item-value {
+    font-size: 20px;
+  }
+}
+
+
+/* ============================================
+   TARJETA - COMO ME FUE AYER
+   ============================================ */
+
+.yesterday-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E6ED;
+  text-align: center;
+}
+
+.yesterday-card-header {
+  margin-bottom: 20px;
+}
+
+.yesterday-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1d21;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-align: center;
+}
+
+.yesterday-card-date {
+  font-size: 11px;
+  color: #5a6169;
+  margin-top: 4px;
+}
+
+.yesterday-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.yesterday-item {
+  padding: 12px;
+  background: #F5F6F8;
+  border-radius: 8px;
+}
+
+.yesterday-item-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5a6169;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.yesterday-item-value {
+  font-family: 'Courier New', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: #9C6BCF;
+  text-align: center;
+}
+
+/* Estado especial para Deuda (negativo) */
+.yesterday-item.negative .yesterday-item-label {
+  color: #D32F2F;
+}
+
+.yesterday-item.negative .yesterday-item-value {
+  color: #D32F2F;
+}
+
+/* Estado especial para A Favor (positivo) */
+.yesterday-item.positive .yesterday-item-label {
+  color: #18C6B8;
+}
+
+.yesterday-item.positive .yesterday-item-value {
+  color: #18C6B8;
+}
+
+/* Loading state */
+.yesterday-card.loading .yesterday-item-value {
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+  .yesterday-card {
+    padding: 20px 16px;
+  }
+  
+  .yesterday-item-value {
+    font-size: 20px;
+  }
+}
+
+</style>
