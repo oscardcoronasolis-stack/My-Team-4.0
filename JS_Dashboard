@@ -1,0 +1,275 @@
+<script>
+/* ============================================
+   DASHBOARD - FILTRO Y DATOS
+   ============================================ */
+
+const DashboardFilter = {
+  
+  // Estado
+  selectedMonth: null,
+  tiendaId: null,
+  
+  // Nombres de meses
+  monthNames: {
+    1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril',
+    5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
+    9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+  },
+  
+  // Inicializar
+  init() {
+    console.log('[Dashboard] Inicializando...');
+    
+    // Obtener tiendaId del usuario logueado
+    const userData = JSON.parse(sessionStorage.getItem('userData'));
+    if (userData && userData.tienda) {
+      this.getTiendaId(userData.tienda);
+    }
+    
+    // Seleccionar mes actual por defecto
+    const currentMonth = new Date().getMonth() + 1;
+    const currentMonthBtn = document.querySelector(`[data-month="${currentMonth}"]`);
+    if (currentMonthBtn) {
+      this.selectMonth(currentMonth, currentMonthBtn);
+    }
+  },
+  
+  // Obtener ID de tienda
+  getTiendaId(nombreTienda) {
+    google.script.run
+      .withSuccessHandler((id) => {
+        this.tiendaId = id;
+        console.log('[Dashboard] TiendaId obtenido:', id);
+        
+        // Cargar datos del mes seleccionado
+        if (this.selectedMonth) {
+          this.loadMonthData(this.selectedMonth);
+        }
+        
+        // Cargar datos de ayer (solo una vez, no depende del filtro)
+        this.loadYesterdayData();
+      })
+      .withFailureHandler((error) => {
+        console.error('[Dashboard] Error obteniendo tiendaId:', error);
+      })
+      .getTiendaId(nombreTienda);
+  },
+  
+  // Seleccionar mes
+  selectMonth(monthNumber, btnElement) {
+    console.log('[Dashboard] Mes seleccionado:', monthNumber);
+    
+    this.selectedMonth = monthNumber;
+    
+    // UI: Actualizar botones
+    document.querySelectorAll('.month-btn').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
+    
+    // UI: Mostrar indicador
+    document.getElementById('selectedMonthIndicator').style.display = 'block';
+    document.getElementById('selectedMonthValue').textContent = this.monthNames[monthNumber];
+    
+    // Cargar datos del mes
+    this.loadMonthData(monthNumber);
+  },
+  
+  // Cargar datos del mes (afectados por filtro)
+  loadMonthData(monthNumber) {
+    if (!this.tiendaId) {
+      console.log('[Dashboard] Esperando tiendaId...');
+      return;
+    }
+    
+    console.log('[Dashboard] Cargando datos - Tienda:', this.tiendaId, 'Mes:', monthNumber);
+    
+    // Mostrar loading en tarjetas afectadas por mes
+    this.setCardLoading('victoryCard', true);
+    this.setCardLoading('commissionCurrentCard', true);
+    this.setCardLoading('kpiCard', true);
+    
+    // Consultar datos
+    google.script.run
+      .withSuccessHandler((data) => {
+        console.log('[Dashboard] Datos del mes recibidos:', data);
+        this.renderMonthData(data);
+      })
+      .withFailureHandler((error) => {
+        console.error('[Dashboard] Error cargando datos del mes:', error);
+        this.setCardLoading('victoryCard', false);
+        this.setCardLoading('commissionCurrentCard', false);
+        this.setCardLoading('kpiCard', false);
+      })
+      .consultarDatosMes(this.tiendaId, monthNumber);
+  },
+  
+  // Cargar datos de ayer (NO afectados por filtro)
+  loadYesterdayData() {
+    if (!this.tiendaId) {
+      console.log('[Dashboard] Esperando tiendaId para datos de ayer...');
+      return;
+    }
+    
+    console.log('[Dashboard] Cargando datos de ayer - Tienda:', this.tiendaId);
+    
+    this.setCardLoading('yesterdayCard', true);
+    
+    google.script.run
+      .withSuccessHandler((data) => {
+        console.log('[Dashboard] Datos de ayer recibidos:', data);
+        this.renderYesterdayData(data);
+      })
+      .withFailureHandler((error) => {
+        console.error('[Dashboard] Error cargando datos de ayer:', error);
+        this.setCardLoading('yesterdayCard', false);
+      })
+      .consultarDatosAyer(this.tiendaId);
+  },
+  
+  // Renderizar datos del mes
+  renderMonthData(data) {
+    if (!data) {
+      console.log('[Dashboard] No hay datos para este mes');
+      document.getElementById('victoryAmount').textContent = '$0';
+      document.getElementById('commissionCurrentAmount').textContent = '$0';
+      document.getElementById('kpiMeta').textContent = '$0';
+      document.getElementById('kpiVenta').textContent = '$0';
+      document.getElementById('kpiDiff').textContent = '$0';
+      this.setCardLoading('victoryCard', false);
+      this.setCardLoading('commissionCurrentCard', false);
+      this.setCardLoading('kpiCard', false);
+      return;
+    }
+    
+    // Tarjeta 1: Victoria Personal - Objetivo_Comision
+    const objetivoComision = parseFloat(data.Objetivo_Comision) || 0;
+    this.animateNumber('victoryAmount', objetivoComision);
+    this.setCardLoading('victoryCard', false);
+    
+    // Tarjeta 2: Comisión Actual Mensual - Comision_Acum
+    const comisionActual = parseFloat(data.Comision_Acum) || 0;
+    document.getElementById('commissionCurrentAmount').textContent = this.formatMoney(comisionActual);
+    this.setCardLoading('commissionCurrentCard', false);
+    
+    // Tarjeta 3: KPI Mensual
+    const meta = parseFloat(data.Meta) || 0;
+    const venta = parseFloat(data.A) || 0;
+    const metaDif = parseFloat(data.Meta_dif) || 0;
+    
+    document.getElementById('kpiMeta').textContent = this.formatMoney(meta);
+    document.getElementById('kpiVenta').textContent = this.formatMoney(venta);
+    document.getElementById('kpiDiff').textContent = this.formatMoney(Math.abs(metaDif));
+    
+    // Cambiar etiqueta y color según positivo/negativo
+    const kpiDiffContainer = document.getElementById('kpiDiffContainer');
+    const kpiDiffLabel = document.getElementById('kpiDiffLabel');
+    
+    kpiDiffContainer.classList.remove('positive', 'negative');
+    
+    if (metaDif < 0) {
+      kpiDiffLabel.textContent = 'Deuda';
+      kpiDiffContainer.classList.add('negative');
+    } else {
+      kpiDiffLabel.textContent = 'A Favor';
+      kpiDiffContainer.classList.add('positive');
+    }
+    
+    this.setCardLoading('kpiCard', false);
+  },
+  
+  // Renderizar datos de ayer
+  renderYesterdayData(data) {
+    // Mostrar fecha de ayer
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    document.getElementById('yesterdayDate').textContent = yesterday.toLocaleDateString('es-MX', options);
+    
+    if (!data) {
+      console.log('[Dashboard] No hay datos de ayer');
+      document.getElementById('yesterdayMeta').textContent = '$0';
+      document.getElementById('yesterdayVenta').textContent = '$0';
+      document.getElementById('yesterdayDiff').textContent = '$0';
+      document.getElementById('yesterdayPctMeta').textContent = '0%';
+      this.setCardLoading('yesterdayCard', false);
+      return;
+    }
+    
+    const meta = parseFloat(data.Meta) || 0;
+    const venta = parseFloat(data.A) || 0;
+    const metaDif = parseFloat(data.Meta_dif) || 0;
+    const crecVsMeta = parseFloat(data.Crec_vs_Meta) || 0;
+    
+    document.getElementById('yesterdayMeta').textContent = this.formatMoney(meta);
+    document.getElementById('yesterdayVenta').textContent = this.formatMoney(venta);
+    document.getElementById('yesterdayDiff').textContent = this.formatMoney(Math.abs(metaDif));
+    document.getElementById('yesterdayPctMeta').textContent = this.formatPercent(crecVsMeta);
+    
+    // Cambiar etiqueta y color según positivo/negativo
+    const diffContainer = document.getElementById('yesterdayDiffContainer');
+    const diffLabel = document.getElementById('yesterdayDiffLabel');
+    
+    diffContainer.classList.remove('positive', 'negative');
+    
+    if (metaDif < 0) {
+      diffLabel.textContent = 'Deuda';
+      diffContainer.classList.add('negative');
+    } else {
+      diffLabel.textContent = 'A Favor';
+      diffContainer.classList.add('positive');
+    }
+    
+    this.setCardLoading('yesterdayCard', false);
+  },
+  
+  // Formatear como moneda
+  formatMoney(value) {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  },
+  
+  // Formatear como porcentaje
+  formatPercent(value) {
+    const percent = value * 100;
+    return Math.round(percent) + '%';
+  },
+  
+  // Animar número
+  animateNumber(elementId, targetValue) {
+    const element = document.getElementById(elementId);
+    const duration = 1500;
+    const startTime = performance.now();
+    const startValue = 0;
+    
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const currentValue = startValue + (targetValue - startValue) * easeProgress;
+      
+      element.textContent = this.formatMoney(currentValue);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  },
+  
+  // Set loading state
+  setCardLoading(cardId, isLoading) {
+    const card = document.getElementById(cardId);
+    if (card) {
+      if (isLoading) {
+        card.classList.add('loading');
+      } else {
+        card.classList.remove('loading');
+      }
+    }
+  }
+};
+</script>
