@@ -5,28 +5,27 @@
 
 const DashboardFilter = {
   
-  // Estado
   selectedMonth: null,
   tiendaId: null,
   
-  // Nombres de meses
   monthNames: {
     1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril',
     5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
     9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
   },
   
-  // Inicializar
+  monthShort: {
+    1: 'Ene', 2: 'Feb', 3: 'Mar', 4: 'Abr',
+    5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Ago',
+    9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic'
+  },
+  
   init() {
-    console.log('[Dashboard] Inicializando...');
-    
-    // Obtener tiendaId del usuario logueado
     const userData = JSON.parse(sessionStorage.getItem('userData'));
     if (userData && userData.tienda) {
       this.getTiendaId(userData.tienda);
     }
     
-    // Seleccionar mes actual por defecto
     const currentMonth = new Date().getMonth() + 1;
     const currentMonthBtn = document.querySelector(`[data-month="${currentMonth}"]`);
     if (currentMonthBtn) {
@@ -34,67 +33,48 @@ const DashboardFilter = {
     }
   },
   
-  // Obtener ID de tienda
   getTiendaId(nombreTienda) {
     google.script.run
       .withSuccessHandler((id) => {
         this.tiendaId = id;
-        console.log('[Dashboard] TiendaId obtenido:', id);
         
-        // Cargar datos del mes seleccionado
         if (this.selectedMonth) {
           this.loadMonthData(this.selectedMonth);
         }
         
-        // Cargar datos de ayer (solo una vez, no depende del filtro)
         this.loadYesterdayData();
+        DashboardHistory.init(id);
+        DashboardWeekly.init(id);
+        DashboardBrand.init(id);
       })
       .withFailureHandler((error) => {
-        console.error('[Dashboard] Error obteniendo tiendaId:', error);
+        console.error('[Dashboard] Error:', error);
       })
       .getTiendaId(nombreTienda);
   },
   
-  // Seleccionar mes
   selectMonth(monthNumber, btnElement) {
-    console.log('[Dashboard] Mes seleccionado:', monthNumber);
-    
     this.selectedMonth = monthNumber;
     
-    // UI: Actualizar botones
     document.querySelectorAll('.month-btn').forEach(btn => btn.classList.remove('active'));
     btnElement.classList.add('active');
     
-    // UI: Mostrar indicador
     document.getElementById('selectedMonthIndicator').style.display = 'block';
     document.getElementById('selectedMonthValue').textContent = this.monthNames[monthNumber];
     
-    // Cargar datos del mes
     this.loadMonthData(monthNumber);
   },
   
-  // Cargar datos del mes (afectados por filtro)
   loadMonthData(monthNumber) {
-    if (!this.tiendaId) {
-      console.log('[Dashboard] Esperando tiendaId...');
-      return;
-    }
+    if (!this.tiendaId) return;
     
-    console.log('[Dashboard] Cargando datos - Tienda:', this.tiendaId, 'Mes:', monthNumber);
-    
-    // Mostrar loading en tarjetas afectadas por mes
     this.setCardLoading('victoryCard', true);
     this.setCardLoading('commissionCurrentCard', true);
     this.setCardLoading('kpiCard', true);
     
-    // Consultar datos
     google.script.run
-      .withSuccessHandler((data) => {
-        console.log('[Dashboard] Datos del mes recibidos:', data);
-        this.renderMonthData(data);
-      })
-      .withFailureHandler((error) => {
-        console.error('[Dashboard] Error cargando datos del mes:', error);
+      .withSuccessHandler((data) => { this.renderMonthData(data); })
+      .withFailureHandler(() => {
         this.setCardLoading('victoryCard', false);
         this.setCardLoading('commissionCurrentCard', false);
         this.setCardLoading('kpiCard', false);
@@ -102,33 +82,19 @@ const DashboardFilter = {
       .consultarDatosMes(this.tiendaId, monthNumber);
   },
   
-  // Cargar datos de ayer (NO afectados por filtro)
   loadYesterdayData() {
-    if (!this.tiendaId) {
-      console.log('[Dashboard] Esperando tiendaId para datos de ayer...');
-      return;
-    }
-    
-    console.log('[Dashboard] Cargando datos de ayer - Tienda:', this.tiendaId);
+    if (!this.tiendaId) return;
     
     this.setCardLoading('yesterdayCard', true);
     
     google.script.run
-      .withSuccessHandler((data) => {
-        console.log('[Dashboard] Datos de ayer recibidos:', data);
-        this.renderYesterdayData(data);
-      })
-      .withFailureHandler((error) => {
-        console.error('[Dashboard] Error cargando datos de ayer:', error);
-        this.setCardLoading('yesterdayCard', false);
-      })
+      .withSuccessHandler((data) => { this.renderYesterdayData(data); })
+      .withFailureHandler(() => { this.setCardLoading('yesterdayCard', false); })
       .consultarDatosAyer(this.tiendaId);
   },
   
-  // Renderizar datos del mes
   renderMonthData(data) {
     if (!data) {
-      console.log('[Dashboard] No hay datos para este mes');
       document.getElementById('victoryAmount').textContent = '$0';
       document.getElementById('commissionCurrentAmount').textContent = '$0';
       document.getElementById('kpiMeta').textContent = '$0';
@@ -140,17 +106,14 @@ const DashboardFilter = {
       return;
     }
     
-    // Tarjeta 1: Victoria Personal - Objetivo_Comision
     const objetivoComision = parseFloat(data.Objetivo_Comision) || 0;
     this.animateNumber('victoryAmount', objetivoComision);
     this.setCardLoading('victoryCard', false);
     
-    // Tarjeta 2: Comisión Actual Mensual - Comision_Acum
     const comisionActual = parseFloat(data.Comision_Acum) || 0;
     document.getElementById('commissionCurrentAmount').textContent = this.formatMoney(comisionActual);
     this.setCardLoading('commissionCurrentCard', false);
     
-    // Tarjeta 3: KPI Mensual
     const meta = parseFloat(data.Meta) || 0;
     const venta = parseFloat(data.A) || 0;
     const metaDif = parseFloat(data.Meta_dif) || 0;
@@ -159,10 +122,8 @@ const DashboardFilter = {
     document.getElementById('kpiVenta').textContent = this.formatMoney(venta);
     document.getElementById('kpiDiff').textContent = this.formatMoney(Math.abs(metaDif));
     
-    // Cambiar etiqueta y color según positivo/negativo
     const kpiDiffContainer = document.getElementById('kpiDiffContainer');
     const kpiDiffLabel = document.getElementById('kpiDiffLabel');
-    
     kpiDiffContainer.classList.remove('positive', 'negative');
     
     if (metaDif < 0) {
@@ -176,16 +137,12 @@ const DashboardFilter = {
     this.setCardLoading('kpiCard', false);
   },
   
-  // Renderizar datos de ayer
   renderYesterdayData(data) {
-    // Mostrar fecha de ayer
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const options = { weekday: 'long', day: 'numeric', month: 'long' };
-    document.getElementById('yesterdayDate').textContent = yesterday.toLocaleDateString('es-MX', options);
+    document.getElementById('yesterdayDate').textContent = yesterday.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
     
     if (!data) {
-      console.log('[Dashboard] No hay datos de ayer');
       document.getElementById('yesterdayMeta').textContent = '$0';
       document.getElementById('yesterdayVenta').textContent = '$0';
       document.getElementById('yesterdayDiff').textContent = '$0';
@@ -194,20 +151,14 @@ const DashboardFilter = {
       return;
     }
     
-    const meta = parseFloat(data.Meta) || 0;
-    const venta = parseFloat(data.A) || 0;
+    document.getElementById('yesterdayMeta').textContent = this.formatMoney(parseFloat(data.Meta) || 0);
+    document.getElementById('yesterdayVenta').textContent = this.formatMoney(parseFloat(data.A) || 0);
+    document.getElementById('yesterdayDiff').textContent = this.formatMoney(Math.abs(parseFloat(data.Meta_dif) || 0));
+    document.getElementById('yesterdayPctMeta').textContent = this.formatPercent(parseFloat(data.Crec_vs_Meta) || 0);
+    
     const metaDif = parseFloat(data.Meta_dif) || 0;
-    const crecVsMeta = parseFloat(data.Crec_vs_Meta) || 0;
-    
-    document.getElementById('yesterdayMeta').textContent = this.formatMoney(meta);
-    document.getElementById('yesterdayVenta').textContent = this.formatMoney(venta);
-    document.getElementById('yesterdayDiff').textContent = this.formatMoney(Math.abs(metaDif));
-    document.getElementById('yesterdayPctMeta').textContent = this.formatPercent(crecVsMeta);
-    
-    // Cambiar etiqueta y color según positivo/negativo
     const diffContainer = document.getElementById('yesterdayDiffContainer');
     const diffLabel = document.getElementById('yesterdayDiffLabel');
-    
     diffContainer.classList.remove('positive', 'negative');
     
     if (metaDif < 0) {
@@ -221,55 +172,272 @@ const DashboardFilter = {
     this.setCardLoading('yesterdayCard', false);
   },
   
-  // Formatear como moneda
   formatMoney(value) {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
   },
   
-  // Formatear como porcentaje
   formatPercent(value) {
-    const percent = value * 100;
-    return Math.round(percent) + '%';
+    return Math.round(value * 100) + '%';
   },
   
-  // Animar número
   animateNumber(elementId, targetValue) {
     const element = document.getElementById(elementId);
-    const duration = 1500;
+    const duration = 1000;
     const startTime = performance.now();
-    const startValue = 0;
     
     const animate = (currentTime) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      const currentValue = startValue + (targetValue - startValue) * easeProgress;
-      
-      element.textContent = this.formatMoney(currentValue);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const easeProgress = 1 - Math.pow(2, -10 * progress);
+      element.textContent = this.formatMoney(targetValue * easeProgress);
+      if (progress < 1) requestAnimationFrame(animate);
     };
     
     requestAnimationFrame(animate);
   },
   
-  // Set loading state
   setCardLoading(cardId, isLoading) {
     const card = document.getElementById(cardId);
-    if (card) {
-      if (isLoading) {
-        card.classList.add('loading');
-      } else {
-        card.classList.remove('loading');
-      }
-    }
+    if (card) card.classList.toggle('loading', isLoading);
   }
 };
+
+/* ============================================
+   DASHBOARD - HISTORIAL
+   ============================================ */
+
+const DashboardHistory = {
+  
+  data: [],
+  currentPage: 0,
+  rowsPerPage: 9,
+  
+  init(tiendaId) {
+    document.getElementById('historyCard').classList.add('loading');
+    
+    google.script.run
+      .withSuccessHandler((data) => {
+        this.data = data || [];
+        this.findTodayPage();
+        this.render();
+        document.getElementById('historyCard').classList.remove('loading');
+      })
+      .withFailureHandler(() => {
+        document.getElementById('historyCard').classList.remove('loading');
+      })
+      .consultarHistorial(tiendaId);
+  },
+  
+  findTodayPage() {
+    const today = new Date().toISOString().split('T')[0];
+    for (let i = 0; i < this.data.length; i++) {
+      const rowDate = this.data[i].Fecha.value || this.data[i].Fecha;
+      if (rowDate === today) {
+        this.currentPage = Math.floor(i / this.rowsPerPage);
+        break;
+      }
+    }
+  },
+  
+  render() {
+    const tbody = document.getElementById('historyTableBody');
+    const start = this.currentPage * this.rowsPerPage;
+    const pageData = this.data.slice(start, start + this.rowsPerPage);
+    const today = new Date().toISOString().split('T')[0];
+    
+    if (pageData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9">No hay datos</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = pageData.map(row => {
+      const fecha = row.Fecha.value || row.Fecha;
+      const aaDif = parseFloat(row.AA_dif) || 0;
+      const metaDif = parseFloat(row.Meta_dif) || 0;
+      
+      let rowClass = '';
+      if (fecha === today) rowClass = 'row-today';
+      else if (fecha > today) rowClass = 'row-future';
+      else if (metaDif < 0) rowClass = 'row-meta-negative';
+      else if (aaDif < 0) rowClass = 'row-aa-negative';
+      
+      const fechaFormatted = new Date(fecha + 'T00:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+      
+      return `<tr class="${rowClass}">
+        <td class="col-fecha">${fechaFormatted}</td>
+        <td class="col-dia">${row.Dia || ''}</td>
+        <td>${this.formatNum(row.A)}</td>
+        <td>${this.formatNum(row.AA)}</td>
+        <td>${this.formatNum(row.AA_dif)}</td>
+        <td>${this.formatPct(row.Crec_vs_AA)}</td>
+        <td class="col-meta-group">${this.formatNum(row.Meta)}</td>
+        <td class="col-meta-group">${this.formatNum(row.Meta_dif)}</td>
+        <td class="col-meta-group">${this.formatPct(row.Crec_vs_Meta)}</td>
+      </tr>`;
+    }).join('');
+    
+    this.updateNav();
+  },
+  
+  updateNav() {
+    const totalPages = Math.ceil(this.data.length / this.rowsPerPage);
+    document.getElementById('historyPrevBtn').disabled = this.currentPage === 0;
+    document.getElementById('historyNextBtn').disabled = this.currentPage >= totalPages - 1;
+    document.getElementById('historyPageIndicator').textContent = `Página ${this.currentPage + 1} de ${totalPages}`;
+  },
+  
+  prevPage() { if (this.currentPage > 0) { this.currentPage--; this.render(); } },
+  nextPage() { if (this.currentPage < Math.ceil(this.data.length / this.rowsPerPage) - 1) { this.currentPage++; this.render(); } },
+  
+  formatNum(v) { return new Intl.NumberFormat('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(parseFloat(v) || 0); },
+  formatPct(v) { return Math.round((parseFloat(v) || 0) * 100) + '%'; }
+};
+
+/* ============================================
+   DASHBOARD - SEMANAL
+   ============================================ */
+
+const DashboardWeekly = {
+  
+  data: [],
+  mode: 'minimo',
+  
+  init(tiendaId) {
+    document.getElementById('weeklyCard').classList.add('loading');
+    
+    google.script.run
+      .withSuccessHandler((data) => {
+        this.data = data || [];
+        this.render();
+        document.getElementById('weeklyCard').classList.remove('loading');
+      })
+      .withFailureHandler(() => {
+        document.getElementById('weeklyCard').classList.remove('loading');
+      })
+      .consultarSemanal(tiendaId);
+  },
+  
+  setMode(mode) {
+    this.mode = mode;
+    document.getElementById('weeklyToggleMin').classList.toggle('active', mode === 'minimo');
+    document.getElementById('weeklyToggleMeta').classList.toggle('active', mode === 'meta');
+    this.render();
+  },
+  
+  render() {
+    const container = document.getElementById('weeklyCircles');
+    
+    container.innerHTML = Array.from({ length: 10 }, (_, i) => {
+      const weekData = this.data[i];
+      
+      if (weekData) {
+        const semana = parseInt(weekData.Semana) || 0;
+        const value = this.mode === 'minimo' ? parseFloat(weekData.Crec_vs_AA) || 0 : parseFloat(weekData.Crec_vs_Meta) || 0;
+        const circleClass = value >= 0 ? 'positive' : 'negative';
+        
+        return `<div class="weekly-item">
+          <div class="weekly-circle ${circleClass}">${Math.round(value * 100)}%</div>
+          <div class="weekly-number">${semana}</div>
+        </div>`;
+      }
+      
+      return `<div class="weekly-item">
+        <div class="weekly-circle empty">-</div>
+        <div class="weekly-number">-</div>
+      </div>`;
+    }).join('');
+  }
+};
+
+
+/* ============================================
+   DASHBOARD - TU MARCA PERSONAL
+   ============================================ */
+
+const DashboardBrand = {
+  
+  data: [],
+  currentPage: 0,
+  rowsPerPage: 6,
+  
+  init(tiendaId) {
+    document.getElementById('brandCard').classList.add('loading');
+    
+    google.script.run
+      .withSuccessHandler((data) => {
+        this.data = data || [];
+        this.render();
+        document.getElementById('brandCard').classList.remove('loading');
+      })
+      .withFailureHandler(() => {
+        document.getElementById('brandCard').classList.remove('loading');
+      })
+      .consultarMarcaPersonal(tiendaId);
+  },
+  
+  render() {
+    const tbody = document.getElementById('brandTableBody');
+    const start = this.currentPage * this.rowsPerPage;
+    const pageData = this.data.slice(start, start + this.rowsPerPage);
+    
+    const monthShort = { 1: 'Ene', 2: 'Feb', 3: 'Mar', 4: 'Abr', 5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Ago', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic' };
+    
+    if (pageData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7">No hay datos</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = pageData.map(row => {
+      const mes = parseInt(row.Mes) || 1;
+      const quincena = parseInt(row.Quincena) || 1;
+      const tipoComision = parseFloat(row.Tipo_Comision) || 0;
+      const gemaSencilla = parseInt(row.GemasSencilla) || 0;
+      const gemaDoble = parseInt(row.GemasDoble) || 0;
+      
+      const periodo = `${monthShort[mes]} Q${quincena}`;
+      
+      // Icono: estrella en círculo negro o palomita verde
+      let icon = '';
+      if (gemaDoble === 1) {
+        icon = '<span class="icon-star">⭐</span>';
+      } else if (gemaSencilla === 1) {
+        icon = '<span class="icon-check">✓</span>';
+      }
+      
+      // Tipo comisión: Sencilla o Especial
+      let tipoText = '';
+      if (tipoComision === 0.0075 || tipoComision === 0.00750) {
+        tipoText = '<span class="tipo-sencilla">Sencilla</span>';
+      } else if (tipoComision === 0.01 || tipoComision === 0.01000) {
+        tipoText = '<span class="tipo-especial">Especial</span>';
+      } else {
+        tipoText = '<span class="tipo-sencilla">-</span>';
+      }
+      
+      return `<tr>
+        <td class="col-periodo">${periodo}</td>
+        <td>${this.formatNum(row.A)}</td>
+        <td>${this.formatNum(row.AA)}</td>
+        <td>${this.formatNum(row.AA_dif)}</td>
+        <td>${tipoText}</td>
+        <td>${this.formatMoney(row.Comision)}</td>
+        <td class="col-icon">${icon}</td>
+      </tr>`;
+    }).join('');
+    
+    this.updateNav();
+  },
+  
+  updateNav() {
+    const totalPages = Math.ceil(this.data.length / this.rowsPerPage);
+    document.getElementById('brandPrevBtn').disabled = this.currentPage === 0;
+    document.getElementById('brandNextBtn').disabled = this.currentPage >= totalPages - 1;
+  },
+  
+  prevPage() { if (this.currentPage > 0) { this.currentPage--; this.render(); } },
+  nextPage() { if (this.currentPage < Math.ceil(this.data.length / this.rowsPerPage) - 1) { this.currentPage++; this.render(); } },
+  
+  formatNum(v) { return new Intl.NumberFormat('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(parseFloat(v) || 0); },
+  formatMoney(v) { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(parseFloat(v) || 0); }
+};
+
 </script>
