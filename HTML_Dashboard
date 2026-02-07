@@ -103,4 +103,90 @@
     </div>
   </div>
   
+
+<!-- Tarjeta 5: Historial -->
+  <div id="historyCard" class="history-card loading">
+    <div class="history-card-header">
+      <div class="history-card-title">Historial</div>
+      <div class="history-nav">
+        <button id="historyPrevBtn" class="history-nav-btn" onclick="DashboardHistory.prevPage()">◀</button>
+        <button id="historyNextBtn" class="history-nav-btn" onclick="DashboardHistory.nextPage()">▶</button>
+      </div>
+    </div>
+    
+    <div class="history-table-container">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Día</th>
+            <th class="col-aa-group">Venta</th>
+            <th class="col-aa-group">Mínimo</th>
+            <th class="col-aa-group">Dif</th>
+            <th class="col-aa-group">% Crec</th>
+            <th class="col-meta-group">Meta</th>
+            <th class="col-meta-group">Dif</th>
+            <th class="col-meta-group">% Crec</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <tr>
+            <td colspan="9">Cargando...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div id="historyPageIndicator" class="history-page-indicator">
+      Página 1 de 1
+    </div>
+  </div>
+
+<!-- Tarjeta 6: Semanal -->
+  <div id="weeklyCard" class="weekly-card loading">
+    <div class="weekly-card-header">
+      <div class="weekly-card-title">Semanal</div>
+      <div class="weekly-toggle">
+        <button id="weeklyToggleMin" class="weekly-toggle-btn active" onclick="DashboardWeekly.setMode('minimo')">Vs Mínimo</button>
+        <button id="weeklyToggleMeta" class="weekly-toggle-btn" onclick="DashboardWeekly.setMode('meta')">Vs Meta</button>
+      </div>
+    </div>
+    <div id="weeklyCircles" class="weekly-circles">
+      <!-- Se genera dinámicamente -->
+    </div>
+  </div>
+
 </div>
+
+
+<!-- Tarjeta 7: Tu Marca Personal -->
+  <div id="brandCard" class="brand-card loading">
+    <div class="brand-card-header">
+      <div class="brand-card-title">Tu Marca Personal</div>
+      <div class="brand-nav">
+        <button id="brandPrevBtn" class="brand-nav-btn" onclick="DashboardBrand.prevPage()">▲</button>
+        <button id="brandNextBtn" class="brand-nav-btn" onclick="DashboardBrand.nextPage()">▼</button>
+      </div>
+    </div>
+    
+    <div class="brand-table-container">
+      <table class="brand-table">
+        <thead>
+          <tr>
+            <th>Periodo</th>
+            <th>Venta</th>
+            <th>Mínimo</th>
+            <th>Dif</th>
+            <th>%</th>
+            <th>Comisión</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="brandTableBody">
+          <tr>
+            <td colspan="7">Cargando...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
