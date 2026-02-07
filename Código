@@ -560,3 +560,117 @@ function consultarDatosAyer(tiendaId) {
     throw error;
   }
 }
+
+/**
+ * Consultar historial de 15 días antes y después de hoy
+ */
+function consultarHistorial(tiendaId) {
+  try {
+    Logger.log('Consultando historial para tienda ' + tiendaId);
+    
+    const query = `
+      SELECT 
+        Fecha,
+        Dia,
+        A,
+        AA,
+        AA_dif,
+        Crec_vs_AA,
+        Meta,
+        Meta_dif,
+        Crec_vs_Meta
+      FROM \`${PROJECT_ID}.${DATASET}.Ventas_Diario_2026\`
+      WHERE Tienda = @tiendaId
+        AND Fecha BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 15 DAY) 
+                      AND DATE_ADD(CURRENT_DATE(), INTERVAL 15 DAY)
+      ORDER BY Fecha ASC
+    `;
+    
+    const resultados = ejecutarQueryConParametros(query, {
+      tiendaId: tiendaId
+    });
+    
+    Logger.log('Historial encontrado: ' + resultados.length + ' registros');
+    return resultados;
+    
+  } catch (error) {
+    Logger.log('Error en consultarHistorial: ' + error.toString());
+    throw error;
+  }
+}
+
+/**
+ * Consultar historial semanal (últimas 10 semanas hasta la actual)
+ */
+function consultarSemanal(tiendaId) {
+  try {
+    Logger.log('Consultando semanal para tienda ' + tiendaId);
+    
+    const query = `
+      SELECT 
+        Semana,
+        A,
+        AA,
+        Meta,
+        AA_dif,
+        Meta_dif,
+        Crec_vs_AA,
+        Crec_vs_Meta
+      FROM \`${PROJECT_ID}.${DATASET}.Ventas_Semanal_2026\`
+      WHERE Tienda = @tiendaId
+        AND Semana <= EXTRACT(ISOWEEK FROM CURRENT_DATE())
+      ORDER BY Semana DESC
+      LIMIT 10
+    `;
+    
+    const resultados = ejecutarQueryConParametros(query, {
+      tiendaId: tiendaId
+    });
+    
+    // Invertir para que quede de menor a mayor
+    resultados.reverse();
+    
+    Logger.log('Semanal encontrado: ' + resultados.length + ' registros');
+    return resultados;
+    
+  } catch (error) {
+    Logger.log('Error en consultarSemanal: ' + error.toString());
+    throw error;
+  }
+}
+
+/**
+ * Consultar datos mensuales por quincena para Tu Marca Personal
+ */
+function consultarMarcaPersonal(tiendaId) {
+  try {
+    Logger.log('Consultando marca personal para tienda ' + tiendaId);
+    
+    const query = `
+      SELECT 
+        Mes,
+        Quincena,
+        A,
+        AA,
+        AA_dif,
+        Tipo_Comision,
+        Comision,
+        GemasSencilla,
+        GemasDoble
+      FROM \`${PROJECT_ID}.${DATASET}.Ventas_Mensual_2026\`
+      WHERE Tienda = @tiendaId
+      ORDER BY Mes ASC, Quincena ASC
+    `;
+    
+    const resultados = ejecutarQueryConParametros(query, {
+      tiendaId: tiendaId
+    });
+    
+    Logger.log('Marca personal encontrado: ' + resultados.length + ' registros');
+    return resultados;
+    
+  } catch (error) {
+    Logger.log('Error en consultarMarcaPersonal: ' + error.toString());
+    throw error;
+  }
+}
