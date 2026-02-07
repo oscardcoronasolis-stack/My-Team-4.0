@@ -486,4 +486,490 @@
   }
 }
 
+/* ============================================
+   TARJETA - HISTORIAL (TABLA CON SCROLL)
+   ============================================ */
+
+.history-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E6ED;
+}
+
+.history-card-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.history-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1d21;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-align: center;
+}
+
+.history-nav {
+  display: flex;
+  gap: 6px;
+  position: absolute;
+  right: 0;
+}
+
+.history-nav-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #E2E6ED;
+  border-radius: 6px;
+  background: #F5F6F8;
+  color: #1a1d21;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.history-nav-btn:hover {
+  border-color: #9C6BCF;
+  background: #FFFFFF;
+}
+
+.history-nav-btn:active {
+  transform: scale(0.95);
+}
+
+.history-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.history-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9px;
+  min-width: 500px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 6px 3px;
+  text-align: center;
+  border-bottom: 1px solid #E2E6ED;
+}
+
+.history-table th {
+  font-weight: 700;
+  color: #5a6169;
+  text-transform: uppercase;
+  font-size: 8px;
+  letter-spacing: 0.3px;
+  position: sticky;
+  top: 0;
+  background: #FFFFFF;
+}
+
+/* Columna de fecha */
+.history-table .col-fecha {
+  text-align: left;
+  font-weight: 600;
+  color: #1a1d21;
+  white-space: nowrap;
+}
+
+.history-table .col-dia {
+  color: #5a6169;
+  font-weight: 500;
+}
+
+/* Columnas Morado Pastel (Meta) */
+.col-meta-group {
+  background: rgba(156, 107, 207, 0.08);
+}
+
+.history-table th.col-meta-group {
+  background: rgba(156, 107, 207, 0.15);
+  color: #6B4C8F;
+}
+
+/* Fila de hoy */
+.history-table tr.row-today {
+  background: rgba(156, 107, 207, 0.1);
+}
+
+.history-table tr.row-today td {
+  font-weight: 700;
+}
+
+/* Fila futura */
+.history-table tr.row-future {
+  opacity: 0.5;
+}
+
+/* Formato condicional - AA negativo (rojo suave) */
+.history-table tr.row-aa-negative {
+  background: rgba(211, 47, 47, 0.08);
+}
+
+.history-table tr.row-aa-negative td {
+  color: #D32F2F;
+}
+
+/* Formato condicional - Meta negativo (rojo intenso) */
+.history-table tr.row-meta-negative {
+  background: rgba(211, 47, 47, 0.15);
+}
+
+.history-table tr.row-meta-negative td {
+  color: #B71C1C;
+  font-weight: 700;
+}
+
+/* Indicador de página */
+.history-page-indicator {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 9px;
+  color: #5a6169;
+}
+
+/* Loading state */
+.history-card.loading .history-table {
+  opacity: 0.5;
+}
+
+/* ============================================
+   TARJETA - SEMANAL (CÍRCULOS)
+   ============================================ */
+
+.weekly-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E6ED;
+}
+
+.weekly-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.weekly-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1d21;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.weekly-toggle {
+  display: flex;
+  gap: 4px;
+  background: #F5F6F8;
+  border-radius: 6px;
+  padding: 3px;
+}
+
+.weekly-toggle-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: #5a6169;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.weekly-toggle-btn.active {
+  background: #9C6BCF;
+  color: #FFFFFF;
+}
+
+.weekly-circles {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.weekly-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.weekly-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.weekly-circle.positive {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+}
+
+.weekly-circle.negative {
+  background: linear-gradient(135deg, #EF5350 0%, #C62828 100%);
+}
+
+.weekly-circle.empty {
+  background: #E2E6ED;
+  color: #5a6169;
+}
+
+.weekly-number {
+  font-size: 9px;
+  color: #5a6169;
+  font-weight: 500;
+}
+
+/* Loading state */
+.weekly-card.loading .weekly-circles {
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+  .history-table {
+    font-size: 8px;
+  }
+  
+  .history-table th,
+  .history-table td {
+    padding: 5px 2px;
+  }
+  
+  .history-nav-btn {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .weekly-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 8px;
+  }
+  
+  .weekly-number {
+    font-size: 8px;
+  }
+}
+
+/* ============================================
+   TARJETA - TU MARCA PERSONAL
+   ============================================ */
+
+.brand-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 14px 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E6ED;
+}
+
+.brand-card-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.brand-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1d21;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.brand-nav {
+  display: flex;
+  gap: 4px;
+  position: absolute;
+  right: 0;
+}
+
+.brand-nav-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #E2E6ED;
+  border-radius: 4px;
+  background: #F5F6F8;
+  color: #1a1d21;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.brand-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.brand-table-container {
+  max-height: 180px;
+  overflow: hidden;
+}
+
+.brand-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8px;
+}
+
+.brand-table th,
+.brand-table td {
+  padding: 4px 2px;
+  text-align: center;
+  border-bottom: 1px solid #E2E6ED;
+}
+
+.brand-table th {
+  font-weight: 700;
+  color: #5a6169;
+  text-transform: uppercase;
+  font-size: 7px;
+  letter-spacing: 0.2px;
+  position: sticky;
+  top: 0;
+  background: #FFFFFF;
+}
+
+.brand-table .col-periodo {
+  text-align: left;
+  font-weight: 600;
+  color: #1a1d21;
+  white-space: nowrap;
+  font-size: 7px;
+}
+
+.brand-table .col-icon {
+  font-size: 12px;
+}
+
+/* Icono estrella en círculo negro */
+.icon-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: #1a1d21;
+  border-radius: 50%;
+  color: #FFD700;
+  font-size: 10px;
+}
+
+/* Icono palomita verde */
+.icon-check {
+  color: #4CAF50;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Tipo comisión */
+.tipo-sencilla {
+  color: #5a6169;
+  font-size: 7px;
+}
+
+.tipo-especial {
+  color: #9C6BCF;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+/* Loading state */
+.brand-card.loading .brand-table {
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+  .brand-card {
+    padding: 12px 8px;
+  }
+  
+  .brand-table {
+    font-size: 7px;
+  }
+  
+  .brand-table th,
+  .brand-table td {
+    padding: 3px 1px;
+  }
+}
+
+/* ============================================
+   OPTIMIZACIÓN MÓVIL - RENDIMIENTO
+   ============================================ */
+
+.dashboard-container {
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.history-table-container,
+.brand-table-container {
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+}
+
+/* Reducir animaciones en móvil */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .month-btn,
+  .history-nav-btn,
+  .brand-nav-btn,
+  .weekly-toggle-btn {
+    transition: none;
+  }
+  
+  .month-btn:active,
+  .history-nav-btn:active,
+  .brand-nav-btn:active {
+    transform: none;
+  }
+}
 </style>
